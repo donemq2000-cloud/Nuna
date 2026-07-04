@@ -1,0 +1,1659 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DramaPress - WordPress Short Drama Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        wpdark: '#23282d',
+                        wphover: '#191e23',
+                        wpblue: '#0073aa',
+                        dramagold: '#FFD700',
+                        dramapurple: '#8A2BE2'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar to look sleek */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+        .wp-sidebar-active {
+            border-left: 4px solid #00a0d2;
+            background-color: #191e23;
+            color: #fff !important;
+        }
+        /* Mobile video player animations */
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.3); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.3); }
+            70% { transform: scale(1); }
+        }
+        .animate-heart {
+            animation: heartBeat 0.8s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
+
+    <!-- TOP ADMIN BAR (WordPress Admin Bar Style) -->
+    <div class="bg-[#1d2327] text-slate-300 h-11 flex items-center justify-between px-4 text-xs font-medium border-b border-slate-700 z-50 sticky top-0">
+        <div class="flex items-center gap-4">
+            <span class="text-sky-400 font-bold flex items-center gap-1.5 text-sm">
+                <i class="fab fa-wordpress text-lg text-slate-200"></i> DramaPress <span class="bg-sky-500/20 text-sky-400 text-[10px] px-1.5 py-0.5 rounded ml-1">v1.4.2</span>
+            </span>
+            <button onclick="switchView('home')" class="hover:bg-slate-800 px-3 py-2 rounded flex items-center gap-1.5 transition">
+                <i class="fas fa-globe"></i> Kunjungi Situs
+            </button>
+            <button onclick="switchView('admin')" class="hover:bg-slate-800 px-3 py-2 rounded flex items-center gap-1.5 transition text-amber-400">
+                <i class="fas fa-tachometer-alt"></i> Dashboard WP-Admin
+            </button>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 bg-slate-800/80 px-2.5 py-1 rounded-full text-slate-200 font-semibold border border-slate-700">
+                <i class="fas fa-coins text-amber-400"></i>
+                <span id="admin-bar-coins">150</span> Koin
+                <button onclick="addFreeCoins()" class="ml-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2 py-0.5 rounded text-[10px] uppercase transition">Klaim Harian</button>
+            </div>
+            <span class="hidden sm:inline text-slate-400">Halo, <strong class="text-slate-200">Admin_Drama</strong></span>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow flex flex-col">
+
+        <!-- ========================================================= -->
+        <!-- FRONT-END CLIENT PORTAL                                    -->
+        <!-- ========================================================= -->
+        <div id="client-portal" class="flex-grow flex flex-col bg-slate-950">
+            <!-- Navbar -->
+            <nav class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 py-3.5 px-4 sticky top-11 z-40">
+                <div class="max-w-7xl mx-auto flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl font-black bg-gradient-to-r from-violet-500 via-fuchsia-500 to-amber-400 bg-clip-text text-transparent tracking-wider cursor-pointer" onclick="navigateHome()">
+                            DRAMAPRESS
+                        </span>
+                        <span class="text-xs bg-slate-800 px-2 py-1 rounded text-slate-400 hidden md:inline">Tema WP Short-Drama Premium</span>
+                    </div>
+
+                    <!-- Search and Navigation -->
+                    <div class="flex items-center gap-4">
+                        <div class="relative hidden md:block">
+                            <input type="text" id="searchInput" placeholder="Cari drama idamanmu..." onkeyup="searchDramas(event)" class="bg-slate-800 text-slate-200 rounded-full py-1.5 px-4 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 w-64 border border-slate-700 transition">
+                            <i class="fas fa-search absolute left-3.5 top-2.5 text-slate-400 text-xs"></i>
+                        </div>
+                        <button onclick="showCoinStore()" class="bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-extrabold text-xs px-4 py-2 rounded-full shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5">
+                            <i class="fas fa-bolt text-sm"></i> TOP UP KOIN
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Inner Views (Home, Detail, Player, CoinStore) -->
+            <div id="portal-content" class="flex-grow p-4 md:p-6 max-w-7xl mx-auto w-full">
+                <!-- Inner pages dynamically loaded here -->
+            </div>
+        </div>
+
+
+        <!-- ========================================================= -->
+        <!-- WP-ADMIN BACKEND PORTAL                                    -->
+        <!-- ========================================================= -->
+        <div id="wp-admin" class="hidden flex-grow flex flex-col md:flex-row bg-[#f0f0f1] text-slate-800">
+            <!-- Sidebar WP-Admin -->
+            <aside class="w-full md:w-60 bg-[#23282d] text-slate-300 shrink-0 select-none">
+                <div class="p-4 bg-[#1d2327] border-b border-slate-800 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded bg-sky-500 flex items-center justify-center text-white text-lg font-bold">DP</div>
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-200">DramaPress Engine</h4>
+                        <p class="text-[10px] text-slate-400">Pengaturan Tema Actived</p>
+                    </div>
+                </div>
+                <nav class="py-2 text-[14px]">
+                    <button onclick="switchAdminTab('dashboard')" id="tab-dashboard" class="wp-sidebar-active w-full text-left px-4 py-2.5 flex items-center gap-2.5 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fas fa-tachometer-alt text-slate-400 w-5"></i> Dashboard
+                    </button>
+                    <div class="border-t border-slate-800 my-1"></div>
+                    <div class="px-4 py-1.5 text-[11px] text-slate-500 uppercase tracking-wider font-bold">Custom Post Types</div>
+                    <button onclick="switchAdminTab('dramas')" id="tab-dramas" class="w-full text-left px-4 py-2.5 flex items-center gap-2.5 hover:bg-slate-800 hover:text-white transition text-slate-300">
+                        <i class="fas fa-film text-slate-400 w-5"></i> Semua Drama <span class="ml-auto bg-slate-700 text-slate-300 text-xs px-2 py-0.5 rounded-full" id="wp-count-dramas">3</span>
+                    </button>
+                    <button onclick="switchAdminTab('episodes')" id="tab-episodes" class="w-full text-left px-4 py-2.5 flex items-center gap-2.5 hover:bg-slate-800 hover:text-white transition text-slate-300">
+                        <i class="fas fa-play-circle text-slate-400 w-5"></i> Kelola Episode <span class="ml-auto bg-slate-700 text-slate-300 text-xs px-2 py-0.5 rounded-full" id="wp-count-episodes">15</span>
+                    </button>
+                    <div class="border-t border-slate-800 my-1"></div>
+                    <div class="px-4 py-1.5 text-[11px] text-slate-500 uppercase tracking-wider font-bold">Monetisasi WP</div>
+                    <button onclick="switchAdminTab('users')" id="tab-users" class="w-full text-left px-4 py-2.5 flex items-center gap-2.5 hover:bg-slate-800 hover:text-white transition text-slate-300">
+                        <i class="fas fa-users-cog text-slate-400 w-5"></i> Pelanggan & Koin
+                    </button>
+                    <button onclick="switchAdminTab('settings')" id="tab-settings" class="w-full text-left px-4 py-2.5 flex items-center gap-2.5 hover:bg-slate-800 hover:text-white transition text-slate-300">
+                        <i class="fas fa-sliders-h text-slate-400 w-5"></i> Pengaturan Koin
+                    </button>
+                    <div class="border-t border-slate-800 my-1"></div>
+                    <div class="px-4 py-1.5 text-[11px] text-slate-500 uppercase tracking-wider font-bold">Bantuan & Lisensi</div>
+                    <a href="#" class="block px-4 py-2 flex items-center gap-2.5 text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fas fa-book-open text-slate-400 w-5"></i> Dokumentasi Tema
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Content WP-Admin -->
+            <section class="flex-grow p-4 md:p-8 overflow-y-auto">
+                <div class="max-w-5xl mx-auto" id="admin-tab-content">
+                    <!-- Admin tabs will be loaded dynamically -->
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-800/80 py-6 text-center text-xs text-slate-500 shrink-0">
+        <p>© 2026 <strong>DramaPress WordPress Theme</strong>. Dikembangkan secara profesional untuk performa tinggi.</p>
+        <p class="mt-1 text-slate-600">Simulasi website interaktif siap digunakan. Hubungkan dengan database WordPress nyata menggunakan REST API.</p>
+    </footer>
+
+    <!-- NOTIFICATION SYSTEM -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        // IN-MEMORY DATABASES (REPRESENTING WORDPRESS DATABASE)
+        const MOCK_DRAMAS = [
+            {
+                id: 1,
+                title: "Miliarder yang Menyamar Jadi Gojek",
+                slug: "miliarder-menyamar-gojek",
+                genre: "Romance, Drama",
+                status: "Tamat",
+                views: 124500,
+                rating: "4.8",
+                cover: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?q=80&w=600&auto=format&fit=crop",
+                description: "Andi, pewaris tunggal kerajaan bisnis Wijaya Group beraset Rp100 Triliun, memilih menyamar menjadi pengemudi ojek online demi mencari cinta sejati yang tidak memandang harta. Namun, ia malah dijodohkan dengan gadis ambisius dari keluarga sederhana yang membencinya karena dikira miskin. Akankah rahasianya terbongkar saat perusahaan keluarganya hampir membeli tempat gadis itu bekerja?",
+                cast: "Reza Rahadian (Andi), Amanda Manopo (Siti), Slamet Rahardjo (Pak Wijaya)",
+                trending: true
+            },
+            {
+                id: 2,
+                title: "Balas Dendam Sang Ratu yang Terbuang",
+                slug: "balas-dendam-ratu-terbuang",
+                genre: "Action, Thriller",
+                status: "Berjalan",
+                views: 89300,
+                rating: "4.9",
+                cover: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop",
+                description: "Diana dijebak oleh adik tirinya sendiri dan dibuang ke panti asuhan luar negeri dalam keadaan buta. Lima tahun kemudian, ia kembali dengan identitas baru sebagai 'Ratu Kegelapan' industri keuangan internasional setelah berhasil memulihkan matanya. Menggunakan kekuasaan tak terbatas, ia mulai menghancurkan satu persatu orang yang pernah mengkhianatinya.",
+                cast: "Chelsea Islan (Diana), Nicholas Saputra (Rian), Shareefa Daanish (Siska)",
+                trending: true
+            },
+            {
+                id: 3,
+                title: "Suamiku Ternyata CEO Mafia",
+                slug: "suamiku-ternyata-ceo-mafia",
+                genre: "Romance, Action",
+                status: "Tamat",
+                views: 245100,
+                rating: "4.7",
+                cover: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=600&auto=format&fit=crop",
+                description: "Nikah kontrak berdurasi 1 tahun membawa Lisa masuk ke dalam kehidupan misterius Rian, pria dingin yang mengaku hanya bekerja sebagai akuntan biasa. Suatu hari, saat sekelompok gangster bersenjata menyerbu apartemen mereka, Lisa menyaksikan langsung suaminya yang pemalu menghabisi musuh dalam waktu kurang dari 30 detik. Siapakah Rian sebenarnya?",
+                cast: "Pevita Pearce (Lisa), Chicco Jerikho (Rian), Roy Marten (Don Corleone)",
+                trending: false
+            }
+        ];
+
+        const MOCK_EPISODES = [
+            // Episodes for Drama 1
+            { id: 11, dramaId: 1, epNum: 1, title: "Sengatan Takdir", isFree: true, coinCost: 0, duration: "1:45", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-city-traffic-at-night-seen-from-above-34282-large.mp4", caption: "Andi memulai hari pertama penyamarannya dan bertemu dengan Siti yang sedang menangis." },
+            { id: 12, dramaId: 1, epNum: 2, title: "Pertemuan di Lampu Merah", isFree: true, coinCost: 0, duration: "2:02", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-woman-ordering-food-at-a-street-food-stall-41617-large.mp4", caption: "Siti tidak menyangka driver ojek yang mengantarkannya adalah calon tunangannya." },
+            { id: 13, dramaId: 1, epNum: 3, title: "Mertua yang Angkuh", isFree: false, coinCost: 10, duration: "1:55", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-businessman-working-on-his-laptop-42171-large.mp4", caption: "Ibu Siti memaki Andi dan membandingkannya dengan pelamar kaya lainnya." },
+            { id: 14, dramaId: 1, epNum: 4, title: "Kontrak Triliunan Rupiah", isFree: false, coinCost: 15, duration: "2:10", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-businessman-shaking-hands-with-a-partner-42173-large.mp4", caption: "Perusahaan Siti hampir bangkrut, dan hanya Wijaya Group yang bisa menyelamatkannya." },
+            { id: 15, dramaId: 1, epNum: 5, title: "Topeng Mulai Retak", isFree: false, coinCost: 20, duration: "2:30", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-people-walking-on-a-busy-city-street-42111-large.mp4", caption: "Siti melihat Andi turun dari mobil mewah berplat nomor khusus." },
+
+            // Episodes for Drama 2
+            { id: 21, dramaId: 2, epNum: 1, title: "Dikhianati Adik Sendiri", isFree: true, coinCost: 0, duration: "2:15", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-sad-woman-looking-out-of-the-window-41614-large.mp4", caption: "Diana terbangun di kamar gelap dan menyadari penglihatannya telah hilang." },
+            { id: 22, dramaId: 2, epNum: 2, title: "Kembalinya Sang Ratu", isFree: true, coinCost: 0, duration: "1:50", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-fashion-woman-walking-in-a-luxury-hallway-40118-large.mp4", caption: "Langkah tegap Diana menggoncang gedung bursa efek Jakarta." },
+            { id: 23, dramaId: 2, epNum: 3, title: "Saham yang Anjlok", isFree: false, coinCost: 15, duration: "2:05", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-business-charts-and-data-on-a-screen-42170-large.mp4", caption: "Siska panik luar biasa melihat aset perusahaannya menguap dalam hitungan menit." },
+            { id: 24, dramaId: 2, epNum: 4, title: "Makan Malam Menegangkan", isFree: false, coinCost: 20, duration: "2:20", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-pouring-red-wine-into-a-glass-41604-large.mp4", caption: "Diana mengundang Siska dalam sebuah jamuan makan malam formal yang mencekam." },
+            { id: 25, dramaId: 2, epNum: 5, title: "Keadilan yang Berdarah", isFree: false, coinCost: 25, duration: "3:01", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-rainy-night-in-a-neon-lit-city-42099-large.mp4", caption: "Pertarungan akhir di bawah guyuran hujan badai di atap gedung." },
+
+            // Episodes for Drama 3
+            { id: 31, dramaId: 3, epNum: 1, title: "Suami Pendiam", isFree: true, coinCost: 0, duration: "1:40", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-man-reading-a-book-by-the-window-41620-large.mp4", caption: "Lisa heran suaminya lebih suka membaca buku akuntansi di sudut sepi." },
+            { id: 32, dramaId: 3, epNum: 2, title: "Gebrakan Gangster", isFree: true, coinCost: 0, duration: "2:10", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-dark-empty-alley-with-puddles-and-neon-lights-42097-large.mp4", caption: "Pintu apartemen mereka didobrak paksa oleh sekelompok pria berjas hitam." },
+            { id: 33, dramaId: 3, epNum: 3, title: "30 Detik Mematikan", isFree: false, coinCost: 15, duration: "2:00", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-fast-paced-lights-of-city-traffic-at-night-42103-large.mp4", caption: "Lisa menyaksikan seni beladiri mematikan suaminya dari balik lemari." },
+            { id: 34, dramaId: 3, epNum: 4, title: "Dunia Bawah Tanah", isFree: false, coinCost: 15, duration: "1:55", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-poker-game-table-with-chips-and-cards-41603-large.mp4", caption: "Rian terpaksa membawa Lisa ke markas rahasia demi melindunginya." },
+            { id: 35, dramaId: 3, epNum: 5, title: "Cinta dan Peluru", isFree: false, coinCost: 25, duration: "2:45", videoSrc: "https://assets.mixkit.co/videos/preview/mixkit-smoke-rising-in-a-dark-room-with-neon-lights-42101-large.mp4", caption: "Rian harus memilih antara takhta mafia atau keselamatan Lisa." }
+        ];
+
+        // CONFIGS & SETTINGS
+        const WP_SETTINGS = {
+            coinPrice: 1000, // Rp 1.000 per coin
+            freeDailyCoins: 25,
+            themeColor: 'purple'
+        };
+
+        const STATE = {
+            dramas: [...MOCK_DRAMAS],
+            episodes: [...MOCK_EPISODES],
+            user: {
+                coins: 150,
+                unlockedEpisodes: [13, 23] // IDs of episodes already unlocked by user
+            },
+            currentView: 'home', // 'home', 'detail', 'player', 'admin'
+            adminTab: 'dashboard',
+            selectedDramaId: 1,
+            selectedEpisodeId: 11,
+            // For editing/creating states in admin
+            editingDrama: null,
+            editingEpisode: null
+        };
+
+        // Initialize Application
+        window.onload = function() {
+            renderActiveView();
+            updateStatsCounts();
+        };
+
+        // View Switching Core Controller
+        function switchView(viewName) {
+            STATE.currentView = viewName;
+            
+            const portalEl = document.getElementById('client-portal');
+            const adminEl = document.getElementById('wp-admin');
+
+            if (viewName === 'admin') {
+                portalEl.classList.add('hidden');
+                adminEl.classList.remove('hidden');
+                switchAdminTab(STATE.adminTab);
+            } else {
+                adminEl.classList.add('hidden');
+                portalEl.classList.remove('hidden');
+                renderActiveView();
+            }
+        }
+
+        // Render client view depending on state
+        function renderActiveView() {
+            const contentContainer = document.getElementById('portal-content');
+            
+            if (STATE.currentView === 'home') {
+                contentContainer.innerHTML = getHomeHTML();
+            } else if (STATE.currentView === 'detail') {
+                contentContainer.innerHTML = getDetailHTML();
+            } else if (STATE.currentView === 'player') {
+                contentContainer.innerHTML = getPlayerHTML();
+                // Load video source and play
+                const videoEl = document.getElementById('main-video-player');
+                if (videoEl) {
+                    videoEl.load();
+                    videoEl.play().catch(e => console.log("Auto play prevented: ", e));
+                }
+            } else if (STATE.currentView === 'coinstore') {
+                contentContainer.innerHTML = getCoinStoreHTML();
+            }
+            updateUserCoinDisplays();
+        }
+
+        function navigateHome() {
+            STATE.currentView = 'home';
+            renderActiveView();
+        }
+
+        function viewDramaDetail(id) {
+            STATE.selectedDramaId = id;
+            STATE.currentView = 'detail';
+            renderActiveView();
+        }
+
+        function playEpisode(epId) {
+            const ep = STATE.episodes.find(e => e.id === epId);
+            if (!ep) return;
+
+            // Check if episode is locked
+            if (!ep.isFree && !STATE.user.unlockedEpisodes.includes(epId)) {
+                // Show modal to unlock
+                showUnlockModal(ep);
+                return;
+            }
+
+            STATE.selectedEpisodeId = epId;
+            STATE.selectedDramaId = ep.dramaId;
+            STATE.currentView = 'player';
+            renderActiveView();
+        }
+
+        // Custom Modal to Unlock Premium Episode
+        function showUnlockModal(ep) {
+            const modalHTML = `
+                <div id="unlock-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
+                        <div class="w-16 h-16 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl border border-amber-500/30">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-100">Episode Terkunci!</h3>
+                        <p class="text-xs text-slate-400 mt-1">Saksikan Episode ${ep.epNum}: "${ep.title}"</p>
+                        
+                        <div class="my-5 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                            <p class="text-xs text-slate-400">Biaya Akses:</p>
+                            <p class="text-2xl font-black text-amber-400 flex items-center justify-center gap-1 mt-1">
+                                <i class="fas fa-coins text-lg"></i> ${ep.coinCost} <span class="text-xs text-slate-400 font-normal">Koin</span>
+                            </p>
+                            <div class="border-t border-slate-800/80 my-3"></div>
+                            <p class="text-xs text-slate-400">Saldo Koin Anda:</p>
+                            <p class="font-bold text-slate-200">${STATE.user.coins} Koin</p>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            ${STATE.user.coins >= ep.coinCost ? `
+                                <button onclick="unlockEpisode(${ep.id})" class="bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-black py-2.5 rounded-xl text-sm transition">
+                                    Buka Sekarang
+                                </button>
+                            ` : `
+                                <div class="text-red-400 text-xs font-semibold mb-1">Koin tidak mencukupi!</div>
+                                <button onclick="closeUnlockModal(); showCoinStore();" class="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-slate-100 font-bold py-2.5 rounded-xl text-sm transition">
+                                    Top Up Koin Sekarang
+                                </button>
+                            `}
+                            <button onclick="closeUnlockModal()" class="text-slate-400 hover:text-slate-200 text-xs py-2 mt-1">
+                                Batalkan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        function closeUnlockModal() {
+            const modal = document.getElementById('unlock-modal');
+            if (modal) modal.remove();
+        }
+
+        function unlockEpisode(epId) {
+            const ep = STATE.episodes.find(e => e.id === epId);
+            if (!ep) return;
+
+            if (STATE.user.coins >= ep.coinCost) {
+                STATE.user.coins -= ep.coinCost;
+                STATE.user.unlockedEpisodes.push(epId);
+                closeUnlockModal();
+                showToast("Sukses!", `Episode ${ep.epNum} berhasil dibuka!`, "success");
+                updateUserCoinDisplays();
+                playEpisode(epId);
+            } else {
+                showToast("Gagal!", "Saldo koin Anda tidak cukup.", "error");
+            }
+        }
+
+        function addFreeCoins() {
+            STATE.user.coins += WP_SETTINGS.freeDailyCoins;
+            showToast("Sukses!", `Klaim harian berhasil! Anda mendapatkan +${WP_SETTINGS.freeDailyCoins} koin gratis.`, "success");
+            updateUserCoinDisplays();
+        }
+
+        function buyCoinPackage(amount, price) {
+            STATE.user.coins += amount;
+            showToast("Sukses!", `Berhasil membeli paket ${amount} koin seharga ${price}!`, "success");
+            updateUserCoinDisplays();
+            navigateHome();
+        }
+
+        function updateUserCoinDisplays() {
+            document.getElementById('admin-bar-coins').textContent = STATE.user.coins;
+            const shopCoins = document.getElementById('shop-user-coins');
+            if (shopCoins) shopCoins.textContent = STATE.user.coins;
+        }
+
+        // Search Dramas
+        function searchDramas(event) {
+            const query = event.target.value.toLowerCase();
+            const grid = document.getElementById('drama-grid');
+            if (!grid) return;
+
+            const filtered = STATE.dramas.filter(d => 
+                d.title.toLowerCase().includes(query) || 
+                d.genre.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-500">
+                        <i class="fas fa-search text-4xl mb-3"></i>
+                        <p>Drama tidak ditemukan dengan kata kunci "${query}"</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(drama => `
+                <div onclick="viewDramaDetail(${drama.id})" class="group cursor-pointer bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/10 transition duration-300">
+                    <div class="relative aspect-[3/4] overflow-hidden">
+                        <img src="${drama.cover}" alt="${drama.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute top-2 left-2 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-bold px-2 py-0.5 rounded-full border border-amber-500/30">
+                            ⭐ ${drama.rating}
+                        </div>
+                        <div class="absolute bottom-2 right-2 bg-violet-600/90 text-[10px] text-white font-bold px-2 py-0.5 rounded-full">
+                            ${drama.status}
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h4 class="font-bold text-sm text-slate-100 line-clamp-1 group-hover:text-violet-400 transition">${drama.title}</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5">${drama.genre}</p>
+                        <p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
+                            <i class="fas fa-eye"></i> ${(drama.views / 1000).toFixed(1)}k ditonton
+                        </p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // =========================================================
+        // VIEW ENGINE GENERATORS (HTML builders)
+        // =========================================================
+
+        // FRONT-END: HOMEPAGE
+        function getHomeHTML() {
+            const featured = STATE.dramas.find(d => d.trending) || STATE.dramas[0];
+            const dramasGridHTML = STATE.dramas.map(drama => `
+                <div onclick="viewDramaDetail(${drama.id})" class="group cursor-pointer bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/10 transition duration-300">
+                    <div class="relative aspect-[3/4] overflow-hidden">
+                        <img src="${drama.cover}" alt="${drama.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute top-2 left-2 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-bold px-2 py-0.5 rounded-full border border-amber-500/30">
+                            ⭐ ${drama.rating}
+                        </div>
+                        <div class="absolute bottom-2 right-2 bg-violet-600/90 text-[10px] text-white font-bold px-2 py-0.5 rounded-full">
+                            ${drama.status}
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h4 class="font-bold text-sm text-slate-100 line-clamp-1 group-hover:text-violet-400 transition">${drama.title}</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5">${drama.genre}</p>
+                        <p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1">
+                            <i class="fas fa-eye"></i> ${(drama.views / 1000).toFixed(1)}k ditonton
+                        </p>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <!-- FEATURED BANNER HERO -->
+                <div class="relative bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 mb-8 p-6 md:p-10 flex flex-col md:flex-row gap-6 items-center shadow-xl">
+                    <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/70 to-transparent z-0 opacity-80"></div>
+                    <img src="${featured.cover}" alt="${featured.title}" class="absolute right-0 top-0 w-full md:w-1/2 h-full object-cover z-0 blur-sm opacity-25 md:opacity-40">
+                    
+                    <div class="relative z-10 w-full md:w-1/2 flex flex-col justify-center">
+                        <span class="text-amber-400 text-xs font-bold tracking-widest uppercase mb-2 flex items-center gap-1.5">
+                            <i class="fas fa-fire animate-bounce"></i> Rekomendasi Terhangat Pekan Ini
+                        </span>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-3 leading-tight">${featured.title}</h2>
+                        <p class="text-slate-300 text-sm mb-4 line-clamp-3 leading-relaxed">${featured.description}</p>
+                        <div class="flex items-center gap-3 text-xs mb-5">
+                            <span class="bg-violet-500/20 text-violet-400 border border-violet-500/30 px-2.5 py-1 rounded-full font-semibold">${featured.genre}</span>
+                            <span class="text-slate-400"><i class="fas fa-star text-amber-400 mr-1"></i>${featured.rating} Rating</span>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="viewDramaDetail(${featured.id})" class="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold px-6 py-3 rounded-full text-sm transition shadow-lg shadow-violet-500/20 flex items-center gap-2">
+                                <i class="fas fa-info-circle"></i> Info Detail
+                            </button>
+                            <button onclick="playEpisode(${STATE.episodes.find(e => e.dramaId === featured.id)?.id || 11})" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-6 py-3 rounded-full text-sm transition flex items-center gap-2">
+                                <i class="fas fa-play"></i> Tonton Episode 1
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ALL DRAMAS LIST -->
+                <div class="mb-12">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                                <i class="fas fa-video text-violet-500"></i> Katalog Short Drama Terbaru
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-1">Dramatis, cepat, dan imersif langsung dari smartphone Anda.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="text-xs text-slate-400">Total: ${STATE.dramas.length} Drama</span>
+                        </div>
+                    </div>
+
+                    <!-- Grid Layout -->
+                    <div id="drama-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        ${dramasGridHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        // FRONT-END: DETAIL PAGE
+        function getDetailHTML() {
+            const drama = STATE.dramas.find(d => d.id === STATE.selectedDramaId);
+            if (!drama) return `<p class="text-center text-red-500">Drama tidak ditemukan.</p>`;
+
+            const episodesList = STATE.episodes.filter(e => e.dramaId === drama.id);
+
+            const episodesHTML = episodesList.map(ep => {
+                const isUnlocked = ep.isFree || STATE.user.unlockedEpisodes.includes(ep.id);
+                return `
+                    <div onclick="playEpisode(${ep.id})" class="relative bg-slate-900 border ${isUnlocked ? 'border-slate-800 hover:border-violet-500' : 'border-amber-500/20 hover:border-amber-500/40'} p-3.5 rounded-xl cursor-pointer transition flex items-center justify-between group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-black text-slate-300 group-hover:bg-violet-600 group-hover:text-white transition">
+                                ${ep.epNum}
+                            </div>
+                            <div>
+                                <h5 class="text-xs font-bold text-slate-200 line-clamp-1 group-hover:text-violet-400 transition">${ep.title}</h5>
+                                <p class="text-[10px] text-slate-400 mt-0.5"><i class="far fa-clock mr-1"></i>${ep.duration}</p>
+                            </div>
+                        </div>
+                        <div>
+                            ${isUnlocked ? `
+                                <span class="text-slate-500 text-xs"><i class="fas fa-play text-[10px] text-green-400"></i> Putar</span>
+                            ` : `
+                                <span class="bg-amber-500/10 text-amber-400 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 border border-amber-500/20">
+                                    <i class="fas fa-lock text-[8px]"></i> ${ep.coinCost} Koin
+                                </span>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="flex flex-col gap-6">
+                    <!-- Breadcrumbs -->
+                    <div class="flex items-center gap-2 text-xs text-slate-400 mb-2">
+                        <span onclick="navigateHome()" class="hover:text-violet-400 cursor-pointer">Beranda</span>
+                        <i class="fas fa-chevron-right text-[8px]"></i>
+                        <span class="text-slate-200 truncate">${drama.title}</span>
+                    </div>
+
+                    <!-- Drama Profile Hero -->
+                    <div class="flex flex-col md:flex-row gap-6 md:gap-10 bg-slate-900/40 border border-slate-800/80 p-6 rounded-3xl">
+                        <!-- Left Poster -->
+                        <div class="w-full md:w-64 aspect-[3/4] md:h-96 shrink-0 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+                            <img src="${drama.cover}" alt="${drama.title}" class="w-full h-full object-cover">
+                        </div>
+
+                        <!-- Right Details -->
+                        <div class="flex-grow flex flex-col justify-between">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2.5 mb-2">
+                                    <span class="bg-violet-600/20 text-violet-400 border border-violet-500/30 text-xs px-2.5 py-0.5 rounded-full font-semibold">${drama.genre}</span>
+                                    <span class="text-xs text-amber-400 font-bold"><i class="fas fa-star mr-1"></i>${drama.rating} Rating</span>
+                                    <span class="text-xs text-slate-400"><i class="fas fa-eye mr-1"></i>${(drama.views/1000).toFixed(1)}k ditonton</span>
+                                </div>
+                                <h1 class="text-2xl md:text-3xl font-black text-white leading-tight mb-4">${drama.title}</h1>
+                                
+                                <div class="mb-4">
+                                    <h4 class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Sinopsis</h4>
+                                    <p class="text-xs md:text-sm text-slate-300 leading-relaxed">${drama.description}</p>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800/50 text-xs mb-4">
+                                    <div>
+                                        <p class="text-slate-500">Pemain Utama</p>
+                                        <p class="text-slate-300 mt-1 font-semibold">${drama.cast}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-slate-500">Status Rilis</p>
+                                        <p class="text-slate-300 mt-1 font-semibold flex items-center gap-1.5">
+                                            <span class="w-2 h-2 rounded-full ${drama.status === 'Tamat' ? 'bg-green-500' : 'bg-yellow-500'}"></span>
+                                            ${drama.status}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3">
+                                <button onclick="playEpisode(${episodesList[0]?.id})" class="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold px-8 py-3.5 rounded-full text-xs md:text-sm transition shadow-lg shadow-violet-500/20 flex items-center justify-center gap-2">
+                                    <i class="fas fa-play"></i> Putar Mulai Episode 1
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Episode Grid Listing -->
+                    <div>
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                            <h3 class="font-bold text-lg text-white">Daftar Episode (${episodesList.length})</h3>
+                            <span class="text-xs text-slate-400">Klik untuk langsung menonton</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            ${episodesHTML}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // FRONT-END: VERTICAL IMMERSIVE PLAYER (Tiktok/ReelShort style)
+        function getPlayerHTML() {
+            const currentEp = STATE.episodes.find(e => e.id === STATE.selectedEpisodeId);
+            const drama = STATE.dramas.find(d => d.id === STATE.selectedDramaId);
+            const allEps = STATE.episodes.filter(e => e.dramaId === drama.id);
+
+            // Calculate next and prev episodes
+            const currentIdx = allEps.findIndex(e => e.id === currentEp.id);
+            const prevEp = currentIdx > 0 ? allEps[currentIdx - 1] : null;
+            const nextEp = currentIdx < allEps.length - 1 ? allEps[currentIdx + 1] : null;
+
+            return `
+                <div class="flex flex-col lg:flex-row gap-6 max-h-[85vh]">
+                    <!-- Left: Immersive Vertical Video Player Wrapper -->
+                    <div class="flex-grow flex justify-center items-center bg-black rounded-3xl overflow-hidden relative shadow-2xl border border-slate-800 h-[60vh] lg:h-[75vh] aspect-[9/16] mx-auto max-w-[420px] w-full">
+                        <!-- Real Native Video Element with autoplay + loop -->
+                        <video id="main-video-player" class="w-full h-full object-cover" autoplay loop playsinline>
+                            <source src="${currentEp.videoSrc}" type="video/mp4">
+                            Browser Anda tidak mendukung elemen video.
+                        </video>
+
+                        <!-- Custom Overlays inside Player -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80 pointer-events-none z-10"></div>
+
+                        <!-- Top Quick Controls -->
+                        <div class="absolute top-4 left-4 right-4 z-20 flex justify-between items-center text-xs bg-slate-900/60 backdrop-blur-md p-2 rounded-full border border-slate-800">
+                            <span onclick="viewDramaDetail(${drama.id})" class="hover:text-violet-400 cursor-pointer font-bold truncate max-w-[150px]">
+                                <i class="fas fa-chevron-left mr-1"></i> ${drama.title}
+                            </span>
+                            <span class="text-amber-400 font-black">EPS ${currentEp.epNum}</span>
+                        </div>
+
+                        <!-- Right Interaction Panel (TikTok Style) -->
+                        <div class="absolute right-4 bottom-24 z-20 flex flex-col gap-5 items-center text-white">
+                            <!-- Favorite/Heart -->
+                            <button onclick="toggleLike(this)" class="group flex flex-col items-center">
+                                <span class="w-11 h-11 bg-slate-950/70 backdrop-blur-md rounded-full border border-slate-800 flex items-center justify-center text-lg group-hover:text-red-500 transition">
+                                    <i class="fas fa-heart text-red-500"></i>
+                                </span>
+                                <span class="text-[10px] mt-1 text-slate-300">12k</span>
+                            </button>
+                            <!-- Koin Locked / Status -->
+                            <div class="flex flex-col items-center">
+                                <span class="w-11 h-11 bg-slate-950/70 backdrop-blur-md rounded-full border border-slate-800 flex items-center justify-center text-lg text-amber-400">
+                                    <i class="fas fa-lock-open text-sm"></i>
+                                </span>
+                                <span class="text-[10px] mt-1 text-slate-300">Akses</span>
+                            </div>
+                            <!-- Comments Trigger -->
+                            <button onclick="scrollToComments()" class="group flex flex-col items-center">
+                                <span class="w-11 h-11 bg-slate-950/70 backdrop-blur-md rounded-full border border-slate-800 flex items-center justify-center text-lg group-hover:text-violet-400 transition">
+                                    <i class="fas fa-comment-dots"></i>
+                                </span>
+                                <span class="text-[10px] mt-1 text-slate-300">830</span>
+                            </button>
+                        </div>
+
+                        <!-- Bottom Information Panel Overlay -->
+                        <div class="absolute bottom-4 left-4 right-16 z-20 text-xs">
+                            <p class="font-black text-sm text-white flex items-center gap-2">
+                                ${drama.title} <span class="text-amber-400 text-xs">[Eps ${currentEp.epNum}]</span>
+                            </p>
+                            <p class="text-slate-300 text-[11px] line-clamp-2 mt-1 leading-relaxed">
+                                "${currentEp.title}" - ${currentEp.caption}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Interactive Episode Switcher & Comment Simulator -->
+                    <div class="w-full lg:w-96 flex flex-col gap-4 overflow-y-auto max-h-[75vh]">
+                        <!-- Quick Next / Prev Buttons -->
+                        <div class="grid grid-cols-2 gap-2 shrink-0">
+                            ${prevEp ? `
+                                <button onclick="playEpisode(${prevEp.id})" class="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                    <i class="fas fa-step-backward text-[10px]"></i> Eps ${prevEp.epNum} (Sebelumnya)
+                                </button>
+                            ` : `
+                                <button class="bg-slate-900/30 border border-slate-800/40 text-slate-600 py-3 rounded-xl text-xs font-bold cursor-not-allowed" disabled>
+                                    Eps Terendah
+                                </button>
+                            `}
+
+                            ${nextEp ? `
+                                <button onclick="playEpisode(${nextEp.id})" class="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                    Next Eps ${nextEp.epNum} <i class="fas fa-step-forward text-[10px]"></i>
+                                </button>
+                            ` : `
+                                <button class="bg-slate-900/30 border border-slate-800/40 text-slate-600 py-3 rounded-xl text-xs font-bold cursor-not-allowed" disabled>
+                                    Eps Terakhir
+                                </button>
+                            `}
+                        </div>
+
+                        <!-- Episode Drawer -->
+                        <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex-grow overflow-y-auto max-h-[40vh]">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
+                                <span>Navigasi Cepat Episode</span>
+                                <span class="text-[10px] text-slate-500">${allEps.length} Total</span>
+                            </h4>
+                            <div class="flex flex-col gap-1.5">
+                                ${allEps.map(ep => {
+                                    const isCurrent = ep.id === currentEp.id;
+                                    const isUnlocked = ep.isFree || STATE.user.unlockedEpisodes.includes(ep.id);
+                                    return `
+                                        <div onclick="playEpisode(${ep.id})" class="p-2.5 rounded-lg flex items-center justify-between cursor-pointer text-xs ${isCurrent ? 'bg-violet-600/20 border border-violet-500 text-violet-400' : 'bg-slate-950 border border-slate-800/80 hover:bg-slate-800 text-slate-300'} transition">
+                                            <span>EPS ${ep.epNum}: <strong class="ml-1 ${isCurrent ? 'text-violet-300' : 'text-slate-100'}">${ep.title}</strong></span>
+                                            <div class="flex items-center gap-2">
+                                                ${isUnlocked ? `
+                                                    <i class="fas fa-play text-[9px] text-green-400"></i>
+                                                ` : `
+                                                    <span class="text-amber-400 font-bold flex items-center gap-1 text-[10px]"><i class="fas fa-lock text-[8px]"></i> ${ep.coinCost}</span>
+                                                `}
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Simulated WordPress Comments Box -->
+                        <div id="comments-box" class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col h-[300px]">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b border-slate-800 pb-2"><i class="far fa-comments mr-1.5 text-violet-400"></i> Komentar Terpopuler (WordPress WP-Comments)</h4>
+                            
+                            <!-- Comment Loop Container -->
+                            <div class="flex-grow overflow-y-auto space-y-3 pr-1 text-xs mb-3" id="player-comment-list">
+                                <div class="flex gap-2.5">
+                                    <div class="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-white shrink-0">AN</div>
+                                    <div>
+                                        <div class="flex items-center gap-1.5">
+                                            <strong class="text-slate-200">Andini_M</strong>
+                                            <span class="text-[9px] text-slate-500">2 jam yang lalu</span>
+                                        </div>
+                                        <p class="text-slate-300 mt-0.5">Suka banget sama ceritanya! Akting Reza dapet banget pas dihina ibu mertua. Ditunggu kelanjutannya!</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2.5">
+                                    <div class="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-white shrink-0">RP</div>
+                                    <div>
+                                        <div class="flex items-center gap-1.5">
+                                            <strong class="text-slate-200">RendiP</strong>
+                                            <span class="text-[9px] text-slate-500">4 jam yang lalu</span>
+                                        </div>
+                                        <p class="text-slate-300 mt-0.5">Mantap bener penyamarannya, bikin deg-degan pas di lampu merah kemarin 😂</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Comment Input Form -->
+                            <div class="mt-auto flex gap-1.5 border-t border-slate-800/80 pt-2.5">
+                                <input type="text" id="new-comment-input" placeholder="Tulis komentar kamu..." class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-violet-500 flex-grow">
+                                <button onclick="addComment()" class="bg-violet-600 hover:bg-violet-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition">Kirim</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // FRONT-END: COIN STORE (TOP UP SHOP)
+        function getCoinStoreHTML() {
+            return `
+                <div class="max-w-3xl mx-auto py-4">
+                    <div class="text-center mb-8">
+                        <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-widest"><i class="fas fa-bolt mr-1"></i> TOP UP KOIN INSTAN</span>
+                        <h2 class="text-3xl font-black text-white mt-3 leading-tight">Dapatkan Koin untuk Unlock Episode Premium</h2>
+                        <p class="text-xs text-slate-400 mt-2 max-w-lg mx-auto">Mendukung metode pembayaran instan. Hubungkan tema WP Anda ke Midtrans, Xendit, atau PayPal dengan modul bawaan.</p>
+                        
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xs mx-auto p-4 flex items-center justify-between mt-6">
+                            <span class="text-xs text-slate-400">Koin Anda Saat Ini:</span>
+                            <span class="font-extrabold text-amber-400 text-lg flex items-center gap-1.5"><i class="fas fa-coins text-sm"></i> <span id="shop-user-coins">${STATE.user.coins}</span> Koin</span>
+                        </div>
+                    </div>
+
+                    <!-- Coin Packs Layout -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        <!-- Pack 1 -->
+                        <div class="bg-slate-900 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-5 text-center transition group flex flex-col justify-between">
+                            <div>
+                                <span class="bg-slate-800 text-slate-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Paket Pemula</span>
+                                <div class="my-5">
+                                    <h4 class="text-2xl font-black text-amber-400 flex items-center justify-center gap-1"><i class="fas fa-coins text-lg"></i> 50 <span class="text-xs text-slate-400 font-normal">Koin</span></h4>
+                                    <p class="text-[11px] text-slate-400 mt-1">Cukup untuk unlock 2-3 episode premium</p>
+                                </div>
+                            </div>
+                            <button onclick="buyCoinPackage(50, 'Rp 10.000')" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 w-full rounded-xl text-xs transition">Beli Rp 10.000</button>
+                        </div>
+
+                        <!-- Pack 2 (Recommended) -->
+                        <div class="bg-slate-900 border-2 border-amber-500/80 rounded-2xl p-5 text-center transition flex flex-col justify-between relative shadow-lg shadow-amber-500/10">
+                            <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 text-[9px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">Terpopuler</span>
+                            <div>
+                                <span class="bg-amber-500/10 text-amber-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Paket Seru</span>
+                                <div class="my-5">
+                                    <h4 class="text-3xl font-black text-amber-400 flex items-center justify-center gap-1"><i class="fas fa-coins text-xl"></i> 200 <span class="text-xs text-slate-400 font-normal">Koin</span></h4>
+                                    <p class="text-[11px] text-slate-400 mt-1">Dapatkan bonus tambahan koin +15 gratis!</p>
+                                </div>
+                            </div>
+                            <button onclick="buyCoinPackage(215, 'Rp 35.000')" class="bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-black py-2.5 w-full rounded-xl text-xs transition shadow-lg shadow-amber-500/20">Beli Rp 35.000</button>
+                        </div>
+
+                        <!-- Pack 3 -->
+                        <div class="bg-slate-900 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-5 text-center transition group flex flex-col justify-between">
+                            <div>
+                                <span class="bg-slate-800 text-slate-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Paket Sultan</span>
+                                <div class="my-5">
+                                    <h4 class="text-2xl font-black text-amber-400 flex items-center justify-center gap-1"><i class="fas fa-coins text-lg"></i> 500 <span class="text-xs text-slate-400 font-normal">Koin</span></h4>
+                                    <p class="text-[11px] text-slate-400 mt-1">Akses bebas ke puluhan episode premium</p>
+                                </div>
+                            </div>
+                            <button onclick="buyCoinPackage(500, 'Rp 75.000')" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 w-full rounded-xl text-xs transition">Beli Rp 75.000</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        // =========================================================
+        // WP-ADMIN (BACKEND CONTROLLER & RENDERERS)
+        // =========================================================
+
+        function switchAdminTab(tabName) {
+            STATE.adminTab = tabName;
+            
+            // Remove active classes
+            document.querySelectorAll('#wp-admin aside button').forEach(btn => {
+                btn.classList.remove('wp-sidebar-active');
+            });
+
+            // Set current active
+            const activeBtn = document.getElementById(`tab-${tabName}`);
+            if (activeBtn) activeBtn.classList.add('wp-sidebar-active');
+
+            // Render admin tab html
+            const container = document.getElementById('admin-tab-content');
+            if (tabName === 'dashboard') {
+                container.innerHTML = getAdminDashboardHTML();
+            } else if (tabName === 'dramas') {
+                container.innerHTML = getAdminDramasHTML();
+            } else if (tabName === 'episodes') {
+                container.innerHTML = getAdminEpisodesHTML();
+            } else if (tabName === 'users') {
+                container.innerHTML = getAdminUsersHTML();
+            } else if (tabName === 'settings') {
+                container.innerHTML = getAdminSettingsHTML();
+            }
+        }
+
+        // TAB WP-ADMIN: OVERVIEW DASHBOARD
+        function getAdminDashboardHTML() {
+            // Stats calculations
+            const totalViews = STATE.dramas.reduce((acc, cur) => acc + cur.views, 0);
+            const totalEpisodes = STATE.episodes.length;
+            const revenueSimulation = STATE.user.unlockedEpisodes.length * 15 * WP_SETTINGS.coinPrice;
+
+            return `
+                <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Dashboard DramaPress Theme Engine</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Versi Tema: v1.4.2 | Server API Status: <span class="text-green-600 font-semibold">Online & Aktif</span></p>
+                    </div>
+                    <button onclick="switchView('home')" class="bg-wpblue hover:bg-sky-700 text-white text-xs px-4 py-2 rounded shadow transition">🌐 Kunjungi Live Preview</button>
+                </div>
+
+                <!-- Admin Notification Alert Box -->
+                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded mb-6 text-xs text-slate-700 flex items-center justify-between">
+                    <div>
+                        <strong class="text-emerald-800">Sistem Berjalan Baik!</strong> Database WordPress terintegrasi secara dinamis. Anda dapat langsung mengedit pos atau episode drama di bawah ini.
+                    </div>
+                </div>
+
+                <!-- Stats Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                    <!-- Stat 1 -->
+                    <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded bg-sky-100 text-sky-600 flex items-center justify-center text-xl shrink-0">
+                            <i class="fas fa-film"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold uppercase">Total Drama</p>
+                            <h4 class="text-xl font-black text-slate-800 mt-1">${STATE.dramas.length}</h4>
+                        </div>
+                    </div>
+                    <!-- Stat 2 -->
+                    <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded bg-violet-100 text-violet-600 flex items-center justify-center text-xl shrink-0">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold uppercase">Total Episode</p>
+                            <h4 class="text-xl font-black text-slate-800 mt-1">${totalEpisodes}</h4>
+                        </div>
+                    </div>
+                    <!-- Stat 3 -->
+                    <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold uppercase">Total Tontonan</p>
+                            <h4 class="text-xl font-black text-slate-800 mt-1">${(totalViews/1000).toFixed(1)}k kali</h4>
+                        </div>
+                    </div>
+                    <!-- Stat 4 -->
+                    <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded bg-amber-100 text-amber-600 flex items-center justify-center text-xl shrink-0">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold uppercase">Estimasi Pendapatan</p>
+                            <h4 class="text-xl font-black text-slate-800 mt-1">Rp ${(revenueSimulation).toLocaleString('id-ID')}</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Info Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Popular Drama Stats Table -->
+                    <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm col-span-2">
+                        <h3 class="font-bold text-sm text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-star text-amber-500"></i> Statistik Drama Teratas
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 uppercase border-b border-slate-200">
+                                        <th class="py-2.5 px-3">Judul Drama</th>
+                                        <th class="py-2.5 px-3 text-center">Status</th>
+                                        <th class="py-2.5 px-3 text-right">Ditonton</th>
+                                        <th class="py-2.5 px-3 text-center">Rating</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-slate-700">
+                                    ${STATE.dramas.map(d => `
+                                        <tr>
+                                            <td class="py-3 px-3 font-semibold text-slate-900">${d.title}</td>
+                                            <td class="py-3 px-3 text-center">
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] ${d.status === 'Tamat' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">${d.status}</span>
+                                            </td>
+                                            <td class="py-3 px-3 text-right">${(d.views).toLocaleString('id-ID')}</td>
+                                            <td class="py-3 px-3 text-center font-bold text-amber-600">⭐ ${d.rating}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right: Quick Links panel -->
+                    <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-sm text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-cog text-slate-500"></i> Panduan Cepat Wordpress
+                        </h3>
+                        <div class="text-xs space-y-4">
+                            <div>
+                                <h4 class="font-bold text-slate-900">1. Tambah CPT Baru</h4>
+                                <p class="text-slate-500 mt-0.5">Semua drama didaftarkan sebagai Custom Post Type (CPT). Klik 'Semua Drama' untuk menambah judul baru.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">2. Upload Video Short Drama</h4>
+                                <p class="text-slate-500 mt-0.5">Unggah episode baru dan kaitkan dengan drama induk. Anda dapat menetapkan tarif koin untuk model monetisasi.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">3. Atur Gateway Koin</h4>
+                                <p class="text-slate-500 mt-0.5">Konfigurasikan harga koin dasar per rupiah untuk disesuaikan dengan integrasi payment gateway lokal.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // TAB WP-ADMIN: MANAGE DRAMAS
+        function getAdminDramasHTML() {
+            const listHTML = STATE.dramas.map(d => `
+                <tr class="hover:bg-slate-50 text-xs text-slate-700 divide-x divide-slate-100">
+                    <td class="p-3 w-16">
+                        <img src="${d.cover}" class="w-11 aspect-[3/4] object-cover rounded shadow border" alt="">
+                    </td>
+                    <td class="p-3">
+                        <strong class="text-slate-900 text-sm">${d.title}</strong>
+                        <div class="flex gap-2.5 mt-1 text-[11px] text-sky-600 font-medium">
+                            <button onclick="editDrama(${d.id})" class="hover:underline">Edit</button>
+                            <span class="text-slate-300">|</span>
+                            <button onclick="deleteDrama(${d.id})" class="hover:underline text-red-500">Hapus</button>
+                        </div>
+                    </td>
+                    <td class="p-3">${d.genre}</td>
+                    <td class="p-3 text-center">${d.status}</td>
+                    <td class="p-3 text-center">⭐ ${d.rating}</td>
+                    <td class="p-3 text-right font-mono">${(d.views).toLocaleString('id-ID')}</td>
+                </tr>
+            `).join('');
+
+            return `
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Semua Drama (Custom Post Type)</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Kelola pos induk drama Anda di database WordPress.</p>
+                    </div>
+                    <button onclick="openDramaForm()" class="bg-wpblue hover:bg-sky-700 text-white text-xs px-4 py-2 rounded-md font-bold transition shadow-sm">+ Tambah Drama Baru</button>
+                </div>
+
+                <!-- Drama Form Builder (Hidden until trigged) -->
+                <div id="drama-form-panel" class="hidden bg-white p-5 rounded-lg border border-slate-200 shadow-md mb-6 transition">
+                    <h3 id="drama-form-title" class="font-bold text-slate-800 text-sm mb-4 border-b pb-2 uppercase tracking-wide">Tambah Pos Drama Baru</h3>
+                    <form onsubmit="saveDrama(event)" class="text-xs grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-slate-600 font-semibold mb-1">Judul Drama *</label>
+                            <input type="text" id="form-drama-title" placeholder="cth: Miliarder yang Menyamar" class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 font-semibold mb-1">Genre (Pisahkan dengan koma) *</label>
+                            <input type="text" id="form-drama-genre" placeholder="cth: Romance, Drama" class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 font-semibold mb-1">Pemain Utama *</label>
+                            <input type="text" id="form-drama-cast" placeholder="cth: Reza Rahadian, Chelsea Islan" class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 font-semibold mb-1">URL Gambar Cover (Poster) *</label>
+                            <input type="text" id="form-drama-cover" placeholder="cth: https://images.unsplash.com/..." class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 font-semibold mb-1">Status Rilis</label>
+                            <select id="form-drama-status" class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                                <option value="Berjalan">Berjalan (Ongoing)</option>
+                                <option value="Tamat">Tamat (Completed)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 font-semibold mb-1">Rating Palsu (Untuk Menarik Pengunjung)</label>
+                            <input type="text" id="form-drama-rating" placeholder="cth: 4.8" class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-slate-600 font-semibold mb-1">Sinopsis Ringkas *</label>
+                            <textarea id="form-drama-desc" rows="3" placeholder="Tulis plot atau sinopsis singkat drama..." class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" required></textarea>
+                        </div>
+                        <div class="md:col-span-2 flex justify-end gap-2 border-t pt-3 mt-1">
+                            <button type="button" onclick="closeDramaForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-md font-bold transition">Batal</button>
+                            <button type="submit" class="bg-wpblue hover:bg-sky-700 text-white px-4 py-2 rounded-md font-bold transition">Simpan Drama (Publish)</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Table Container -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 uppercase text-[11px] font-bold border-b border-slate-200">
+                                <th class="p-3 w-16">Cover</th>
+                                <th class="p-3">Judul Drama</th>
+                                <th class="p-3">Genre</th>
+                                <th class="p-3 text-center">Status</th>
+                                <th class="p-3 text-center">Rating</th>
+                                <th class="p-3 text-right">Total Tonton</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${listHTML}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function openDramaForm() {
+            STATE.editingDrama = null;
+            document.getElementById('drama-form-title').innerText = "Tambah Pos Drama Baru";
+            document.getElementById('form-drama-title').value = '';
+            document.getElementById('form-drama-genre').value = '';
+            document.getElementById('form-drama-cast').value = '';
+            document.getElementById('form-drama-cover').value = 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?q=80&w=600&auto=format&fit=crop';
+            document.getElementById('form-drama-status').value = 'Berjalan';
+            document.getElementById('form-drama-rating').value = '4.8';
+            document.getElementById('form-drama-desc').value = '';
+
+            document.getElementById('drama-form-panel').classList.remove('hidden');
+        }
+
+        function closeDramaForm() {
+            document.getElementById('drama-form-panel').classList.add('hidden');
+        }
+
+        function saveDrama(e) {
+            e.preventDefault();
+
+            const title = document.getElementById('form-drama-title').value;
+            const genre = document.getElementById('form-drama-genre').value;
+            const cast = document.getElementById('form-drama-cast').value;
+            const cover = document.getElementById('form-drama-cover').value;
+            const status = document.getElementById('form-drama-status').value;
+            const rating = document.getElementById('form-drama-rating').value || "4.8";
+            const desc = document.getElementById('form-drama-desc').value;
+
+            if (STATE.editingDrama) {
+                // Update
+                const d = STATE.dramas.find(item => item.id === STATE.editingDrama.id);
+                if (d) {
+                    d.title = title;
+                    d.genre = genre;
+                    d.cast = cast;
+                    d.cover = cover;
+                    d.status = status;
+                    d.rating = rating;
+                    d.description = desc;
+                    showToast("Sukses!", "Pos Drama berhasil diperbarui di database WP.", "success");
+                }
+            } else {
+                // Insert New
+                const newId = STATE.dramas.length > 0 ? Math.max(...STATE.dramas.map(item => item.id)) + 1 : 1;
+                STATE.dramas.push({
+                    id: newId,
+                    title,
+                    slug: title.toLowerCase().replace(/ /g, '-'),
+                    genre,
+                    status,
+                    views: 0,
+                    rating,
+                    cover,
+                    description: desc,
+                    cast,
+                    trending: false
+                });
+                showToast("Sukses!", "Drama baru berhasil dipublikasikan!", "success");
+            }
+
+            closeDramaForm();
+            switchAdminTab('dramas');
+            updateStatsCounts();
+        }
+
+        function editDrama(id) {
+            const d = STATE.dramas.find(item => item.id === id);
+            if (!d) return;
+
+            STATE.editingDrama = d;
+            document.getElementById('drama-form-title').innerText = `Edit Pos: ${d.title}`;
+            document.getElementById('form-drama-title').value = d.title;
+            document.getElementById('form-drama-genre').value = d.genre;
+            document.getElementById('form-drama-cast').value = d.cast;
+            document.getElementById('form-drama-cover').value = d.cover;
+            document.getElementById('form-drama-status').value = d.status;
+            document.getElementById('form-drama-rating').value = d.rating;
+            document.getElementById('form-drama-desc').value = d.description;
+
+            document.getElementById('drama-form-panel').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteDrama(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus drama ini dan semua episode terkait dari database?")) {
+                STATE.dramas = STATE.dramas.filter(d => d.id !== id);
+                STATE.episodes = STATE.episodes.filter(ep => ep.dramaId !== id);
+                showToast("Dihapus!", "Drama & Episode terkait berhasil dihapus.", "success");
+                switchAdminTab('dramas');
+                updateStatsCounts();
+            }
+        }
+
+        // TAB WP-ADMIN: MANAGE EPISODES
+        function getAdminEpisodesHTML() {
+            const listHTML = STATE.episodes.map(ep => {
+                const parentDrama = STATE.dramas.find(d => d.id === ep.dramaId);
+                return `
+                    <tr class="hover:bg-slate-50 text-xs text-slate-700 divide-x divide-slate-100">
+                        <td class="p-2.5 font-semibold text-slate-500 text-center">EPS ${ep.epNum}</td>
+                        <td class="p-2.5">
+                            <strong class="text-slate-900 text-sm">${ep.title}</strong>
+                            <div class="flex gap-2.5 mt-1 text-[11px] text-sky-600 font-medium">
+                                <button onclick="editEpisode(${ep.id})" class="hover:underline">Edit</button>
+                                <span class="text-slate-300">|</span>
+                                <button onclick="deleteEpisode(${ep.id})" class="hover:underline text-red-500">Hapus</button>
+                            </div>
+                        </td>
+                        <td class="p-2.5">${parentDrama ? parentDrama.title : '<span class="text-red-500 font-bold">Unassigned</span>'}</td>
+                        <td class="p-2.5 text-center font-mono">${ep.duration}</td>
+                        <td class="p-2.5 text-center">
+                            ${ep.isFree ? `
+                                <span class="bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded text-[10px]">Gratis</span>
+                            ` : `
+                                <span class="bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded text-[10px]"><i class="fas fa-lock"></i> ${ep.coinCost} Koin</span>
+                            `}
+                        </td>
+                        <td class="p-2.5 truncate max-w-[200px] text-slate-400">${ep.videoSrc}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const dramaDropdownHTML = STATE.dramas.map(d => `<option value="${d.id}">${d.title}</option>`).join('');
+
+            return `
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Kelola Episode Drama</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Unggah, sunting, dan hubungkan episode individual dengan drama induk.</p>
+                    </div>
+                    <button onclick="openEpisodeForm()" class="bg-wpblue hover:bg-sky-700 text-white text-xs px-4 py-2 rounded-md font-bold transition shadow-sm">+ Upload Episode Baru</button>
+                </div>
+
+                <!-- Episode Form Panel -->
+                <div id="episode-form-panel" class="hidden bg-white p-5 rounded-lg border border-slate-200 shadow-md mb-6 transition">
+                    <h3 id="episode-form-title" class="font-bold text-slate-800 text-sm mb-4 border-b pb-2 uppercase tracking-wide">Upload / Edit Episode</h3>
+                    <form onsubmit="saveEpisode(event)" class="text-xs grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-slate-600 font-semibold mb-1">Drama Induk *</label>
+                            <select id="form-ep-parent" class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" required>
+                                ${dramaDropdownHTML}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 font-semibold mb-1">Judul Episode *</label>
+                            <input type="text" id="form-ep-title" placeholder="cth: Sang Milyuner Pulang" class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 font-semibold mb-1">Nomor Episode *</label>
+                            <input type="number" id="form-ep-num" placeholder="cth: 3" class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 font-semibold mb-1">Tipe Akses</label>
+                            <select id="form-ep-freetest" onchange="toggleFormCoinCost()" class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                                <option value="true">Gratis (Free)</option>
+                                <option value="false">Berbayar (Koin)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 font-semibold mb-1">Biaya Koin (Jika Berbayar)</label>
+                            <input type="number" id="form-ep-coincost" value="15" class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none bg-slate-50" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 font-semibold mb-1">Durasi Video *</label>
+                            <input type="text" id="form-ep-duration" placeholder="cth: 2:15" class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" required>
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-slate-600 font-semibold mb-1">URL Sumber Video (MP4) *</label>
+                            <input type="text" id="form-ep-src" placeholder="cth: https://assets.mixkit.co/..." class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none" required>
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-slate-600 font-semibold mb-1">Keterangan / Caption Episode</label>
+                            <input type="text" id="form-ep-caption" placeholder="Ringkasan singkat adegan episode ini..." class="w-full border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                        </div>
+                        <div class="md:col-span-3 flex justify-end gap-2 border-t pt-3 mt-1">
+                            <button type="button" onclick="closeEpisodeForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-md font-bold transition">Batal</button>
+                            <button type="submit" class="bg-wpblue hover:bg-sky-700 text-white px-4 py-2 rounded-md font-bold transition">Simpan Episode</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Table Container -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse font-sans">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 uppercase text-[11px] font-bold border-b border-slate-200">
+                                <th class="p-2.5 w-16 text-center">Eps</th>
+                                <th class="p-2.5">Judul Episode</th>
+                                <th class="p-2.5">Drama Induk</th>
+                                <th class="p-2.5 text-center">Durasi</th>
+                                <th class="p-2.5 text-center">Akses</th>
+                                <th class="p-2.5">Sumber Video (Stream Link)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${listHTML}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function openEpisodeForm() {
+            STATE.editingEpisode = null;
+            document.getElementById('episode-form-title').innerText = "Upload Episode Baru";
+            document.getElementById('form-ep-title').value = '';
+            document.getElementById('form-ep-num').value = STATE.episodes.length + 1;
+            document.getElementById('form-ep-freetest').value = "true";
+            document.getElementById('form-ep-coincost').value = "0";
+            document.getElementById('form-ep-coincost').disabled = true;
+            document.getElementById('form-ep-coincost').classList.add('bg-slate-50');
+            document.getElementById('form-ep-duration').value = '2:00';
+            document.getElementById('form-ep-src').value = 'https://assets.mixkit.co/videos/preview/mixkit-rainy-night-in-a-neon-lit-city-42099-large.mp4';
+            document.getElementById('form-ep-caption').value = '';
+
+            document.getElementById('episode-form-panel').classList.remove('hidden');
+        }
+
+        function closeEpisodeForm() {
+            document.getElementById('episode-form-panel').classList.add('hidden');
+        }
+
+        function toggleFormCoinCost() {
+            const isFree = document.getElementById('form-ep-freetest').value === "true";
+            const costInput = document.getElementById('form-ep-coincost');
+            if (isFree) {
+                costInput.value = "0";
+                costInput.disabled = true;
+                costInput.classList.add('bg-slate-50');
+            } else {
+                costInput.value = "15";
+                costInput.disabled = false;
+                costInput.classList.remove('bg-slate-50');
+            }
+        }
+
+        function saveEpisode(e) {
+            e.preventDefault();
+
+            const dramaId = parseInt(document.getElementById('form-ep-parent').value);
+            const title = document.getElementById('form-ep-title').value;
+            const epNum = parseInt(document.getElementById('form-ep-num').value);
+            const isFree = document.getElementById('form-ep-freetest').value === "true";
+            const coinCost = parseInt(document.getElementById('form-ep-coincost').value);
+            const duration = document.getElementById('form-ep-duration').value;
+            const videoSrc = document.getElementById('form-ep-src').value;
+            const caption = document.getElementById('form-ep-caption').value;
+
+            if (STATE.editingEpisode) {
+                // Update existing
+                const ep = STATE.episodes.find(item => item.id === STATE.editingEpisode.id);
+                if (ep) {
+                    ep.dramaId = dramaId;
+                    ep.title = title;
+                    ep.epNum = epNum;
+                    ep.isFree = isFree;
+                    ep.coinCost = coinCost;
+                    ep.duration = duration;
+                    ep.videoSrc = videoSrc;
+                    ep.caption = caption;
+                    showToast("Sukses!", "Episode berhasil diperbarui di database WP.", "success");
+                }
+            } else {
+                // Add new
+                const newId = STATE.episodes.length > 0 ? Math.max(...STATE.episodes.map(item => item.id)) + 1 : 1;
+                STATE.episodes.push({
+                    id: newId,
+                    dramaId,
+                    epNum,
+                    title,
+                    isFree,
+                    coinCost,
+                    duration,
+                    videoSrc,
+                    caption
+                });
+                showToast("Sukses!", "Episode baru berhasil ditambahkan!", "success");
+            }
+
+            closeEpisodeForm();
+            switchAdminTab('episodes');
+            updateStatsCounts();
+        }
+
+        function editEpisode(id) {
+            const ep = STATE.episodes.find(item => item.id === id);
+            if (!ep) return;
+
+            STATE.editingEpisode = ep;
+            document.getElementById('episode-form-title').innerText = `Edit Episode: ${ep.title}`;
+            document.getElementById('form-ep-parent').value = ep.dramaId;
+            document.getElementById('form-ep-title').value = ep.title;
+            document.getElementById('form-ep-num').value = ep.epNum;
+            document.getElementById('form-ep-freetest').value = ep.isFree ? "true" : "false";
+            document.getElementById('form-ep-coincost').value = ep.coinCost;
+            document.getElementById('form-ep-coincost').disabled = ep.isFree;
+            if (ep.isFree) {
+                document.getElementById('form-ep-coincost').classList.add('bg-slate-50');
+            } else {
+                document.getElementById('form-ep-coincost').classList.remove('bg-slate-50');
+            }
+            document.getElementById('form-ep-duration').value = ep.duration;
+            document.getElementById('form-ep-src').value = ep.videoSrc;
+            document.getElementById('form-ep-caption').value = ep.caption || '';
+
+            document.getElementById('episode-form-panel').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteEpisode(id) {
+            if (confirm("Hapus episode ini? Tindakan ini permanen.")) {
+                STATE.episodes = STATE.episodes.filter(ep => ep.id !== id);
+                showToast("Dihapus!", "Episode berhasil dihapus dari database.", "success");
+                switchAdminTab('episodes');
+                updateStatsCounts();
+            }
+        }
+
+
+        // TAB WP-ADMIN: MANAGE USERS / CLIENT BALANCES
+        function getAdminUsersHTML() {
+            return `
+                <div class="mb-6 pb-4 border-b border-slate-200">
+                    <h2 class="text-2xl font-bold text-slate-800">Manajemen Pengguna & Transaksi Koin</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Pantau saldo koin para penonton terdaftar Anda dan manipulasi saldo secara admin.</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 text-sm mb-4">Pengguna Terdaftar Saat Ini</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 uppercase border-b border-slate-200">
+                                    <th class="py-2.5 px-3">Username</th>
+                                    <th class="py-2.5 px-3">Status Langganan</th>
+                                    <th class="py-2.5 px-3 text-center">Aktivitas Unlock</th>
+                                    <th class="py-2.5 px-3 text-center">Saldo Koin Saat Ini</th>
+                                    <th class="py-2.5 px-3 text-center">Aksi Manajemen</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-slate-700">
+                                <tr>
+                                    <td class="py-3 px-3">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 rounded-full bg-violet-500 text-white flex items-center justify-center font-bold">Admin</div>
+                                            <div>
+                                                <strong class="text-slate-900 font-semibold">Admin_Drama (Anda)</strong>
+                                                <span class="block text-[10px] text-slate-400">admin@dramapress.com</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-3"><span class="bg-violet-100 text-violet-700 font-bold px-2.5 py-0.5 rounded-full text-[10px]">Developer</span></td>
+                                    <td class="py-3 px-3 text-center">${STATE.user.unlockedEpisodes.length} Episode</td>
+                                    <td class="py-3 px-3 text-center font-black text-amber-600">${STATE.user.coins} Koin</td>
+                                    <td class="py-3 px-3 text-center">
+                                        <button onclick="grantAdminCoins()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-3 py-1 rounded text-[11px] font-bold transition">+ Tambah 100 Koin</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 px-3">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 rounded-full bg-slate-400 text-white flex items-center justify-center font-bold">BU</div>
+                                            <div>
+                                                <strong class="text-slate-900 font-semibold">BudiUtomo</strong>
+                                                <span class="block text-[10px] text-slate-400">budi@gmail.com</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-3"><span class="bg-sky-100 text-sky-700 font-bold px-2.5 py-0.5 rounded-full text-[10px]">User Biasa</span></td>
+                                    <td class="py-3 px-3 text-center">4 Episode</td>
+                                    <td class="py-3 px-3 text-center font-bold text-slate-700">12 Koin</td>
+                                    <td class="py-3 px-3 text-center">
+                                        <button onclick="showToast('Sukses!', 'BudiUtomo diberikan 100 koin gratis.', 'success')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded text-[11px] font-medium transition">Manipulasi Koin</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function grantAdminCoins() {
+            STATE.user.coins += 100;
+            showToast("Koin Ditambahkan!", "Saldo koin admin berhasil ditambah +100 koin.", "success");
+            switchAdminTab('users');
+            updateUserCoinDisplays();
+        }
+
+        // TAB WP-ADMIN: MONETIZATION CONFIGS & SETTINGS
+        function getAdminSettingsHTML() {
+            return `
+                <div class="mb-6 pb-4 border-b border-slate-200">
+                    <h2 class="text-2xl font-bold text-slate-800">Sistem Pengaturan Koin & Monetisasi</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Konfigurasikan nilai koin dasar, hadiah registrasi harian, dan kustomisasi lainnya untuk aplikasi.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm max-w-2xl text-xs">
+                    <h3 class="font-bold text-sm text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wide">Pengaturan Umum Tema DramaPress</h3>
+                    
+                    <form onsubmit="saveWPSettings(event)" class="space-y-4">
+                        <div class="grid grid-cols-3 gap-4 items-center">
+                            <label class="col-span-1 font-bold text-slate-700">Harga Per Koin (IDR)</label>
+                            <input type="number" id="setting-coin-price" value="${WP_SETTINGS.coinPrice}" class="col-span-2 border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 items-center">
+                            <label class="col-span-1 font-bold text-slate-700">Klaim Harian Gratis (Koin)</label>
+                            <input type="number" id="setting-free-coins" value="${WP_SETTINGS.freeDailyCoins}" class="col-span-2 border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                        </div>
+                        <div class="grid grid-cols-3 gap-4 items-center">
+                            <label class="col-span-1 font-bold text-slate-700">Skema Warna Live Portal</label>
+                            <select id="setting-theme-color" class="col-span-2 border rounded p-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                                <option value="purple" ${WP_SETTINGS.themeColor === 'purple' ? 'selected' : ''}>Sinematik Purple (Rekomendasi)</option>
+                                <option value="gold" ${WP_SETTINGS.themeColor === 'gold' ? 'selected' : ''}>Royal Gold</option>
+                            </select>
+                        </div>
+                        <div class="pt-4 border-t flex justify-end gap-2">
+                            <button type="submit" class="bg-wpblue hover:bg-sky-700 text-white px-5 py-2.5 rounded shadow transition font-bold">Simpan Perubahan</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function saveWPSettings(e) {
+            e.preventDefault();
+            WP_SETTINGS.coinPrice = parseInt(document.getElementById('setting-coin-price').value);
+            WP_SETTINGS.freeDailyCoins = parseInt(document.getElementById('setting-free-coins').value);
+            WP_SETTINGS.themeColor = document.getElementById('setting-theme-color').value;
+
+            showToast("Tersimpan!", "Pengaturan tema WordPress berhasil diperbarui.", "success");
+            switchAdminTab('settings');
+        }
+
+
+        // UTILITY: COUNTS AND COUNTERS UPDATE IN SIDEBAR
+        function updateStatsCounts() {
+            const dramaBadge = document.getElementById('wp-count-dramas');
+            if (dramaBadge) dramaBadge.textContent = STATE.dramas.length;
+
+            const episodeBadge = document.getElementById('wp-count-episodes');
+            if (episodeBadge) episodeBadge.textContent = STATE.episodes.length;
+        }
+
+        // UTILITY: CLIENT-SIDE INTERACTIONS
+        function toggleLike(btn) {
+            const icon = btn.querySelector('i');
+            if (icon.classList.contains('fas')) {
+                icon.classList.replace('fas', 'far');
+                icon.classList.remove('text-red-500');
+                showToast("Dihapus!", "Batal menyukai video ini.", "info");
+            } else {
+                icon.classList.replace('far', 'fas');
+                icon.classList.add('text-red-500');
+                icon.classList.add('animate-heart');
+                setTimeout(() => icon.classList.remove('animate-heart'), 800);
+                showToast("Disukai!", "Video berhasil ditambahkan ke daftar suka Anda.", "success");
+            }
+        }
+
+        function scrollToComments() {
+            const target = document.getElementById('comments-box');
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('new-comment-input').focus();
+            }
+        }
+
+        function addComment() {
+            const input = document.getElementById('new-comment-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const list = document.getElementById('player-comment-list');
+            const commentHTML = `
+                <div class="flex gap-2.5 animate-pulse">
+                    <div class="w-7 h-7 rounded-full bg-violet-600 flex items-center justify-center text-[10px] text-white shrink-0">AD</div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <strong class="text-slate-200">Admin_Drama (Anda)</strong>
+                            <span class="text-[9px] text-slate-500">Baru saja</span>
+                        </div>
+                        <p class="text-slate-300 mt-0.5">${text}</p>
+                    </div>
+                </div>
+            `;
+            list.insertAdjacentHTML('afterbegin', commentHTML);
+            input.value = '';
+            showToast("Komentar Dikirim!", "Komentar Anda berhasil diposting di website.", "success");
+        }
+
+        function showCoinStore() {
+            STATE.currentView = 'coinstore';
+            renderActiveView();
+        }
+
+        // TOAST NOTIFICATIONS HELPER
+        function showToast(title, msg, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toastId = 'toast-' + Math.random().toString(36).substr(2, 9);
+            
+            let bg = 'bg-slate-900 border-slate-800';
+            let iconColor = 'text-green-400';
+            let icon = 'fa-check-circle';
+
+            if (type === 'error') {
+                iconColor = 'text-red-400';
+                icon = 'fa-exclamation-circle';
+            } else if (type === 'info') {
+                iconColor = 'text-sky-400';
+                icon = 'fa-info-circle';
+            }
+
+            const toastHTML = `
+                <div id="${toastId}" class="flex items-center gap-3 p-4 rounded-xl shadow-2xl border ${bg} text-xs text-slate-300 transform translate-y-5 opacity-0 transition duration-300 max-w-sm">
+                    <i class="fas ${icon} ${iconColor} text-lg shrink-0"></i>
+                    <div>
+                        <strong class="text-slate-100 block font-bold">${title}</strong>
+                        <span class="text-slate-400">${msg}</span>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', toastHTML);
+            const el = document.getElementById(toastId);
+            
+            // Trigger animation
+            setTimeout(() => {
+                el.classList.remove('translate-y-5', 'opacity-0');
+            }, 50);
+
+            // Hide and remove
+            setTimeout(() => {
+                el.classList.add('translate-y-5', 'opacity-0');
+                setTimeout(() => el.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+
+```
